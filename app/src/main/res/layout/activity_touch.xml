@@ -1,0 +1,96 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:keepScreenOn="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/canvasLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/buttonCH7On"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/buttonMANUAL">
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/pikoder_logo"
+        android:contentDescription="@+id/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.3"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp"
+        android:src="@drawable/pikoder_logo"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/buttonCH7On"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CH7"
+        android:textStyle="bold"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/textView"
+        android:layout_above="@+id/textView3" />
+
+    <Button
+        android:id="@+id/buttonAUTO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AUTO"
+        android:layout_above="@+id/buttonLEARNING"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/buttonLEARNING" />
+
+    <Button
+        android:id="@+id/buttonLEARNING"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LEARNING"
+        android:layout_above="@+id/buttonMANUAL"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/buttonMANUAL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MANUAL"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/buttonLEARNING" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/textView3"
+        android:background="#555A6E"
+        android:gravity="center"
+        android:text="Aux Channels"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonAUTO"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/buttonAUTO"
+        android:background="#555A6E"
+        android:gravity="center"
+        android:text="Flight Mode Selection"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+</RelativeLayout>

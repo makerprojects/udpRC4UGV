@@ -1,0 +1,167 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true" >
+
+    <RelativeLayout
+        android:id="@+id/canvasLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/mRight">
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/pikoder_logo"
+        android:contentDescription="@+id/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.3"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp"
+        android:src="@drawable/pikoder_logo"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/buttonCH7On"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CH7"
+        android:textStyle="bold"
+        android:layout_alignStart="@+id/textView"
+        android:layout_above="@+id/textView3"
+        android:layout_alignEnd="@+id/textView3" />
+
+    <Button
+        android:id="@+id/buttonAUTO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AUTO"
+        android:layout_above="@+id/buttonLEARNING"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/buttonLEARNING" />
+
+    <Button
+        android:id="@+id/buttonLEARNING"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LEARNING"
+        android:layout_above="@+id/buttonMANUAL"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/buttonMANUAL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MANUAL"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/buttonLEARNING" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#555A6E"
+        android:gravity="center"
+        android:text="Aux Channels"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_above="@+id/buttonCH7On"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonAUTO"
+        android:layout_alignStart="@+id/buttonAUTO"
+        android:background="#555A6E"
+        android:gravity="center"
+        android:text="Flight Mode Selection"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_alignEnd="@+id/buttonAUTO" />
+
+    <TextView
+        android:id="@+id/mRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/mLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mRight"
+        android:layout_alignParentLeft="true"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/textViewY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mLeft"
+        android:layout_alignParentLeft="true"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/textViewX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewY"
+        android:layout_alignParentLeft="true"
+        android:text="" />
+    
+     <TextView
+        android:id="@+id/textViewCmdSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewX"
+        android:layout_alignParentLeft="true"
+        android:text="" />
+
+    <com.udprc4ugv.VerticalSeekBar
+         android:id="@+id/calcVerticalSeekBar"
+         android:layout_width="wrap_content"
+         android:layout_height="match_parent"
+         android:layout_alignParentRight="true"
+         android:fadingEdge="none"
+         android:layout_marginBottom="25dp"
+         android:layout_marginTop="25dp"
+         android:layout_marginRight="20dp"
+         android:progress="0"
+         android:progressDrawable="@layout/progress"
+         android:scrollbarStyle="outsideInset"
+         android:thumb="@layout/progress_t" />
+
+     <TextView
+         android:id="@+id/info_text"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginRight="80dp"
+         android:textSize="20dp"
+         android:gravity="center"
+         android:text="@string/info_text_wheel"
+         android:layout_below="@+id/textView"
+         android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/btnRear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="left|center_vertical"
+        android:text="@string/backward"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/textView"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/textView" />
+
+</RelativeLayout>
