@@ -71,8 +71,8 @@
         android:contentDescription="@+id/app_name"
         android:cropToPadding="false"
         android:paddingBottom="5dp"
-        android:src="@drawable/logo_final"
-        android:layout_alignTop="@+id/forward"
+        android:src="@drawable/logo_final_small"
+        android:layout_alignTop="@+id/right"
         android:layout_centerHorizontal="true" />
 
     <Button

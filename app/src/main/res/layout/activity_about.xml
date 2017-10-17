@@ -32,12 +32,13 @@
         android:contentDescription="@+id/app_name"  
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:alpha="0.35"
         android:paddingLeft="15dp"
         android:paddingBottom="15dp"
-        android:src="@drawable/logo_final"/>
+        android:src="@drawable/logo_final"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/textView1"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:padding="20sp"

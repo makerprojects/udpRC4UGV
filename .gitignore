@@ -126,3 +126,6 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.gitignore.io/api/androidstudio
+.idea/copyright/
+app/libs/
+app/src/main/res/mipmap-ldpi/
