@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">udpRC4UGV</string>
-    <string name="app_name_version">udpRC4UGV 1.0</string>
+    <string name="app_name_version">udpRC4UGV 1.1</string>
     <string name="menu_app_settings">APP Settings</string>
     <string name="menu_ssc_settings">SSC Settings</string>
     <string name="menu_about">About udpRC4UGV</string>
@@ -45,7 +45,7 @@
 	<string name="error_get_data">Data receive error</string>
 
     <string name="default_udpReceiverHotSpotName">PiKoder_wRX</string>
-    <string name="default_networkPasskey">PASSWORD</string>
+    <string name="default_networkPasskey">password</string>
 	<string name="default_IP">192.168.4.1</string>
     <string name="default_PORT">12001</string>
     <string name="default_rxPORT">12000</string>

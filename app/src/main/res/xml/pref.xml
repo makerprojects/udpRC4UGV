@@ -5,7 +5,7 @@
 
 	<PreferenceCategory
 		android:key="pref_General"
-		android:title="General settings"
+		android:title="Access Point settings"
 		android:summary="General settings">
 
 		<EditTextPreference
@@ -19,32 +19,6 @@
 			android:title="Receiver password"
 			android:summary="Set password"
 			android:defaultValue="@string/default_networkPasskey" />
-
-		<com.udprc4ugv.IPAddressPreference
-			android:key="pref_IP_address"
-			android:title="IP address receiver"
-			android:summary="IP address of access point"
-			android:defaultValue="@string/default_IP" />
-
-		<EditTextPreference
-			android:key="pref_Port_number"
-			android:title="Port number receiver"
-			android:summary="Port number for UDP protocol"
-			android:numeric="integer"
-			android:defaultValue="@string/default_PORT" />
-
-		<EditTextPreference
-			android:key="pref_rx_Port_number"
-			android:title="Port number phone"
-			android:summary="Port number for UDP protocol"
-			android:numeric="integer"
-			android:defaultValue="@string/default_rxPORT" />
-
-		<CheckBoxPreference
-			android:key="pref_Debug"
-			android:title="Debug info"
-			android:summary="Show debug information"
-			android:defaultValue="false" />
 
 	</PreferenceCategory>
 
@@ -95,50 +69,6 @@
 			android:summary="value in µs"
 			android:numeric="integer"
 			android:defaultValue="@string/defaultFM_MANUAL_PWM" />
-	</PreferenceCategory>
-
-
-	<PreferenceCategory
-		android:key="pref_Accel"
-		android:title="Accelerometer control settings"
-		android:summary="Accelerometer control settings">
-
-		<EditTextPreference
-			android:key="pref_yMax"
-			android:title="Threshold for the Y axis"
-			android:summary="Limit on the Y axis (sensitivity)"
-			android:numeric="integer"
-			android:defaultValue="@string/default_yMax" />
-
-		<EditTextPreference
-			android:key="pref_xMax"
-			android:title="Threshold for the X axis"
-			android:summary="X axis (sensitivity)"
-			android:numeric="integer"
-			android:defaultValue="@string/default_xMax" />
-
-		<EditTextPreference
-			android:key="pref_xR"
-			android:title="Pivot point for motor (X axis)"
-			android:summary="Pivot point for motor, above which one motor rotate in the opposite direction"
-			android:numeric="integer"
-			android:defaultValue="@string/default_xR" />
-
-
-	</PreferenceCategory>
-
-	<PreferenceCategory
-		android:key="pref_Touch"
-		android:title="Touch control settings"
-		android:summary="Touch control settings">
-
-		<EditTextPreference
-			android:key="pref_xRperc"
-			android:title="Pivot point for motor (X axis) percent"
-			android:summary="Pivot point for motor (in percent), above which one motor rotate in the opposite direction"
-			android:numeric="integer"
-			android:defaultValue="@string/default_xRperc" />
-
 	</PreferenceCategory>
 
 </PreferenceScreen>
