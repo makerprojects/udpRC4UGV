@@ -22,6 +22,7 @@ package com.udprc4ugv;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
@@ -45,18 +47,24 @@ import static com.udprc4ugv.R.layout.activity_buttons;
 public class ActivityButtons extends Activity {
 
 	private UdpServer udpServer = null;
+	private UdpReceiver udpReceiver = null;
 
-	private Button btn_forward, btn_backward, btn_left, btn_right, buttonCH7On, buttonAUTO, buttonMANUAL,buttonLEARNING;
+	private Button btn_forward, btn_backward, btn_left, btn_right;
+	private Button buttonCH7On, buttonAUTO, buttonMANUAL,buttonLEARNING;
+	private ImageButton btn_trim_forward, btn_trim_backward, btn_trim_left, btn_trim_right;
+
 
 	private final String cChannelNeutral = "7F";
 	private final String cChannelMax = "FE"; // equals 0xFE
 	private final String cChannelMin = "00";
 
 	private String udpReceiverHotSpotName;	// hotspot name provided by receiver
+	private String networkPasskey;
 	private String host = "192.168.4.1"; // UDP receiver default address
+	private String rx_host = "192.168.4.2"; // UDP sender default address for responses (smart phone IP address) -> not relevant!
+	private String rx_port = "12000";		// application default port for responses to smart phone
 	private String remotePort = "12001";            // application default port
 	private String localPort = "12000";
-	private String networkPasskey = "PASSWORD";
 	private final String cLeftHeader = "FF00";
 	private final String cRightHeader = "FF01";
 	private String commandLeft = "FF007F";    // make sure we init the string to avoid problem w/o mixing
@@ -73,11 +81,17 @@ public class ActivityButtons extends Activity {
 	private boolean left_up_sent = false;
     private boolean bCH7On_sent = false;
     private boolean bCH7Off_sent = false;
-	private static StringBuilder sb = new StringBuilder();  // used to manage multi cycle messages
 	private static boolean suppressMessage = false;
 	private String FM_AUTO_PWM, FM_LEARNING_PWM, FM_MANUAL_PWM;
+
 	private static String TAG = ActivityButtons.class.getSimpleName();
+	private static final boolean D = true;
+
 	private int	intFMMode;
+
+	// trim function defs
+	static int iChannel1_neutral = 0;
+	static int iChannel2_neutral = 0;
 
 	// fail safe related definitions
 	Timer timer = null;
@@ -88,7 +102,14 @@ public class ActivityButtons extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		udpReceiverHotSpotName = (String) getResources().getText(R.string.default_udpReceiverHotSpotName);
+		Resources res = getResources();
+		mixing = res.getBoolean(R.bool.pref_Mixing);	// enable mixing
+		remotePort = res.getString(R.string.default_PORT); // application default port
+		localPort = res.getString(R.string.default_rxPORT);
+		host = res.getString(R.string.default_IP);   // UDP receiver default address
+		networkPasskey = res.getString(R.string.default_networkPasskey);
+		udpReceiverHotSpotName = res.getString(R.string.default_udpReceiverHotSpotName);	// hotspot name provided by receiver
+
 		loadPref();
 
 		if (FM_AUTO_PWM.length() < 4) {
@@ -110,6 +131,10 @@ public class ActivityButtons extends Activity {
 		buttonAUTO = (Button) findViewById(R.id.buttonAUTO);
 		buttonLEARNING = (Button) findViewById(R.id.buttonLEARNING);
 		buttonMANUAL = (Button) findViewById(R.id.buttonMANUAL);
+		btn_trim_forward = (ImageButton) findViewById(R.id.trim_forward);
+		btn_trim_backward = (ImageButton) findViewById(R.id.trim_backward);
+		btn_trim_left = (ImageButton) findViewById(R.id.trim_left);
+		btn_trim_right = (ImageButton) findViewById(R.id.trim_right);
 
 		Globals g = Globals.getInstance();	// load timeout form global variable
 		iTimeOut = g.getData();
@@ -283,75 +308,175 @@ public class ActivityButtons extends Activity {
 			}
 		});
 
-	}
+		btn_trim_backward.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel2_neutral == 0) {
+						iChannel2_neutral = 1;
+						sentCommand("N2?");
+						Toast.makeText(getBaseContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if (iChannel2_neutral >= 1004) {
+						iChannel2_neutral = iChannel2_neutral - 4;
+						sentCommand("N2=" + Integer.toString(iChannel2_neutral));
+						sentCommand("0x" + cRightHeader + cChannelNeutral);
+					} else {
+						if (iChannel2_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached minmium trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
 
+		btn_trim_forward.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel2_neutral == 0) {
+						iChannel2_neutral = 1;
+						sentCommand("N2?");
+						Toast.makeText(getApplicationContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if (iChannel2_neutral < 1997) {
+						iChannel2_neutral = iChannel2_neutral + 4;
+						sentCommand("N2=" + Integer.toString(iChannel2_neutral));
+						sentCommand("0x" + cRightHeader + cChannelNeutral);
+					} else {
+						if (iChannel2_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached maximum trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+
+		btn_trim_right.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel1_neutral == 0) {
+						iChannel1_neutral = 1;
+						sentCommand("N1?");
+						Toast.makeText(getBaseContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if (iChannel1_neutral >= 1004) {
+						iChannel1_neutral = iChannel1_neutral - 4;
+						sentCommand("N1=" + Integer.toString(iChannel1_neutral));
+						sentCommand("0x" + cLeftHeader + cChannelNeutral);
+					} else {
+						if (iChannel1_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached minmium trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+
+		btn_trim_left.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel1_neutral == 0) {
+						iChannel1_neutral = 1;
+						sentCommand("N1?");
+						Toast.makeText(getApplicationContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if ((iChannel1_neutral < 1997) && (iChannel1_neutral >= 1000)) {
+						iChannel1_neutral = iChannel1_neutral + 4;
+						sentCommand("N1=" + Integer.toString(iChannel1_neutral));
+						sentCommand("0x" + cLeftHeader + cChannelNeutral);
+					} else {
+						if (iChannel1_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached maximum trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+	}
 
 	private static class MyHandler extends Handler {
 		private final WeakReference<ActivityButtons> mActivity;
 
 		public MyHandler(ActivityButtons activity) {
-			mActivity = new WeakReference<ActivityButtons>(activity);
-			}
-			@Override
-			public void handleMessage(Message msg) {
-				ActivityButtons activity = mActivity.get();
-				if (activity != null) {
-					switch (msg.what) {
-						case UdpReceiver.RECEIVE_MESSAGE:								// if message is received
-							String strIncom = new String((byte[]) msg.obj, msg.arg2, msg.arg1);
-							strIncom = strIncom.replace("\r","").replace("\n","");
-							sb.append(strIncom);								// append string
-							Log.v(TAG, "Newly received: " + strIncom + "sb: " + sb.toString());
-							if (strIncom.equals("?")) { // received '?' as errormessage
-								Toast.makeText(activity.getBaseContext(), "Last command could not be executed!", Toast.LENGTH_SHORT).show();
+			mActivity = new WeakReference<>(activity);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			ActivityButtons activity = mActivity.get();
+			if (activity != null) {
+				switch (msg.what) {
+					case UdpServer.RECEIVE_MESSAGE:								// if message is received
+						String strIncom = (String) msg.obj;
+						Log.d(TAG, "Received: " + strIncom );
+						if (strIncom.equals("?")) { // received '?' as errormessage
+							Toast.makeText(activity.getBaseContext(), "Last command could not be executed!", Toast.LENGTH_SHORT).show();
+						} else {
+							if (strIncom.equals("!")) { // did receive acknowledge
 							} else {
-								if (!strIncom.equals("!")) { // did not received acknoledge
-									Toast.makeText(activity.getBaseContext(), "Newly received: " + strIncom + "sb: " + sb.toString(), Toast.LENGTH_SHORT).show();
+								if (strIncom.length() >= 4) {
+									if (iChannel1_neutral ==1) {
+										iChannel1_neutral = Integer.parseInt(strIncom.toString());
+										Log.d(TAG, "Neutral channel 1 set to: " + String.valueOf(iChannel1_neutral));
+									} else {
+										iChannel2_neutral = Integer.parseInt(strIncom.toString());
+										Log.d(TAG, "Neutral channel 2 set to: " + String.valueOf(iChannel2_neutral));
+									}
 								}
 							}
-							sb.delete(0, sb.length());
-							break;
-						case UdpServer.WIFI_NOT_AVAILABLE:
-							Log.d(UdpServer.TAG, "Wifi not available (Android system setting). Exit");
-							Toast.makeText(activity.getBaseContext(), "Wifi not available (Android system setting). Exit", Toast.LENGTH_SHORT).show();
-							activity.finish();
-							break;
-						case UdpServer.RECEIVER_NOT_ON_SCAN_LIST:
-							Log.d(UdpServer.TAG, "AP is not on current scan list. Exit");
-							Toast.makeText(activity.getBaseContext(), "Receiver is not offered by Android system scan", Toast.LENGTH_SHORT).show();
-							activity.finish();
-							break;
-						case UdpServer.WIFI_INCORRECT_ADDRESS:
-							Log.d(UdpServer.TAG, "Connection attempt failed");
-							Toast.makeText(activity.getBaseContext(), "Failed to connect to Hotspot", Toast.LENGTH_SHORT).show();
-							break;
-						case UdpServer.WIFI_REQUEST_ENABLE:
-							Log.d(UdpServer.TAG, "Started connecting to ap...");
-							Toast.makeText(activity.getBaseContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
-							break;
-						case UdpServer.WIFI_SOCKET_FAILED:
-							if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Timeout receiving IP address...", Toast.LENGTH_SHORT).show();
-							activity.finish();
-							break;
-						case UdpServer.USER_STOP_INITIATED:
-							suppressMessage = true;
-							break;
-						case UdpServer.WIFI_HOTSPOT_NOT_FOUND:
-							if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Hotspot not found", Toast.LENGTH_SHORT).show();
-							activity.finish();
-							break;
-						case UdpServer.WIFI_HOTSPOT_CONNECTING:
-							if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Connection ok, loading IP address... ", Toast.LENGTH_SHORT).show();
-							break;
-						case UdpServer.WIFI_HOTSPOT_CONNECTED:
-							String localHostIpAddress = Formatter.formatIpAddress(msg.arg1);
-							Log.v(TAG, "Received local IP address: " + localHostIpAddress);
-							if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Connected to receiver.", Toast.LENGTH_SHORT).show();
-							break;
-					}
+						}
+						break;
+					case UdpServer.WIFI_NOT_AVAILABLE:
+						Log.d(UdpServer.TAG, "Wifi not available (Android system setting). Exit");
+						Toast.makeText(activity.getBaseContext(), "Wifi not available (Android system setting). Exit", Toast.LENGTH_SHORT).show();
+						activity.finish();
+						break;
+					case UdpServer.RECEIVER_NOT_ON_SCAN_LIST:
+						Log.d(UdpServer.TAG, "AP is not on current scan list. Exit");
+						Toast.makeText(activity.getBaseContext(), "Receiver is not offered by Android system scan", Toast.LENGTH_SHORT).show();
+						activity.finish();
+						break;
+					case UdpServer.WIFI_INCORRECT_ADDRESS:
+						Log.d(UdpServer.TAG, "Connection attempt failed");
+						Toast.makeText(activity.getBaseContext(), "Failed to connect to Hotspot", Toast.LENGTH_SHORT).show();
+						break;
+					case UdpServer.WIFI_REQUEST_ENABLE:
+						Log.d(UdpServer.TAG, "Started connecting to ap...");
+						Toast.makeText(activity.getBaseContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
+						break;
+					case UdpServer.WIFI_SOCKET_FAILED:
+						if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Timeout receiving IP address...", Toast.LENGTH_SHORT).show();
+						activity.finish();
+						break;
+					case UdpServer.USER_STOP_INITIATED:
+						suppressMessage = true;
+						break;
+					case UdpServer.WIFI_HOTSPOT_NOT_FOUND:
+						if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Hotspot not found", Toast.LENGTH_SHORT).show();
+						activity.finish();
+						break;
+					case UdpServer.WIFI_HOTSPOT_CONNECTING:
+						if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Connection ok, loading IP address... ", Toast.LENGTH_SHORT).show();
+						break;
+					case UdpServer.WIFI_HOTSPOT_CONNECTED:
+						String localHostIpAddress = Formatter.formatIpAddress(msg.arg1);
+						Log.v(TAG, "Received local IP address: " + localHostIpAddress);
+						if (!suppressMessage) Toast.makeText(activity.getBaseContext(), "Connected to receiver.", Toast.LENGTH_SHORT).show();
+						break;
 				}
-			}
+				}
+		}
 	}
+
+	private final MyHandler mHandler = new MyHandler(this);
+
+	private final static Runnable sRunnable = new Runnable() {
+		public void run() {
+		}
+	};
 
 	// get the heartbeat going
 	public void startTimer() {
@@ -373,13 +498,6 @@ public class ActivityButtons extends Activity {
 			timer = null;
 		}
 	}
-
-	private final MyHandler mHandler = new MyHandler(this);
-
-	private final static Runnable sRunnable = new Runnable() {
-		public void run() {
-		}
-	};
 
 	private void sentCommand(String commandString) {
 		if (!remotePort.matches("^(6553[0-5]|655[0-2]\\d|65[0-4]\\d\\d|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{0,3}|0)$")) {
@@ -415,6 +533,13 @@ public class ActivityButtons extends Activity {
 		super.onResume();
 		suppressMessage = false;
 		udpServer.udpConnect(udpReceiverHotSpotName, networkPasskey);
+		if (udpReceiver == null) {
+			Log.v(TAG, "Restarting receiver...");
+			String uriString = "udp://" + rx_host + ":" + rx_port + "/";
+			Uri uri = Uri.parse(uriString);
+			udpReceiver = new UdpReceiver();
+			udpReceiver.runUdpReceiver(uri, this, mHandler);
+		}
 		// start timer onResume if set
 		if (iTimeOut > 0) {
 			startTimer();
@@ -426,12 +551,20 @@ public class ActivityButtons extends Activity {
 		super.onPause();
 		stopTimer();
 		udpServer.udpServer_onPause();
+		if (udpReceiver != null) {
+			udpReceiver.stopUdpReceiver();
+			udpReceiver = null;
+		}
 		suppressMessage = true;
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		if (udpReceiver != null) {
+			udpReceiver.stopUdpReceiver();
+			udpReceiver = null;
+		}
 	}
 
 	@Override

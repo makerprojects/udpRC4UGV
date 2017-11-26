@@ -128,32 +128,39 @@ public class UdpServer {
                 if (D) Log.d(TAG, "ap is on!");
                 mState = STATE_AVAILABLE;
                 List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-                for (WifiConfiguration i : list) {
-                    if (D) Log.d(TAG, "configured: " + i.SSID);
-                    if (i.SSID != null && i.SSID.equals("\"" + udpHotSpotName + "\"")) {
-                        mState = STATE_CONFIGURED;
-                        apId = i.networkId;
-                        if (D) Log.d(TAG, i.SSID + " already configured!");
-                        break;
-                    }
-                }
-                if (mState < STATE_CONFIGURED) {
-                    apId = wifiManager.addNetwork(wifiConfiguration);
-                    if (D) Log.d(TAG, "added network, id is: " + apId);
-                }
-                boolean b = wifiManager.enableNetwork(apId, true);
-                if (D) Log.d(TAG, "enable network returned: " + b);
-                wifiManager.setWifiEnabled(true);
-                boolean changeHappen = wifiManager.saveConfiguration();
-                if (apId != -1 && changeHappen) {
-                    Log.d(TAG, "connecting to: " + result.SSID);
-                    mState = STATE_CONNECTING;
+                if (list == null) {
+                    mState = WIFI_NOT_AVAILABLE;
                 } else {
-                    mState = STATE_COULD_NOT_CONNECT;
+                    for (WifiConfiguration i : list) {
+                        if (D) Log.d(TAG, "configured: " + i.SSID);
+                        if (i.SSID != null && i.SSID.equals("\"" + udpHotSpotName + "\"")) {
+                            mState = STATE_CONFIGURED;
+                            apId = i.networkId;
+                            if (D) Log.d(TAG, i.SSID + " already configured!");
+                            break;
+                        }
+                    }
+                    if (mState < STATE_CONFIGURED) {
+                        apId = wifiManager.addNetwork(wifiConfiguration);
+                        if (D) Log.d(TAG, "added network, id is: " + apId);
+                    }
+                    boolean b = wifiManager.enableNetwork(apId, true);
+                    if (D) Log.d(TAG, "enable network returned: " + b);
+                    wifiManager.setWifiEnabled(true);
+                    boolean changeHappen = wifiManager.saveConfiguration();
+                    if (apId != -1 && changeHappen) {
+                        Log.d(TAG, "connecting to: " + result.SSID);
+                        mState = STATE_CONNECTING;
+                    } else {
+                        mState = STATE_COULD_NOT_CONNECT;
+                    }
                 }
             }
         }
         switch (mState) {
+            case WIFI_NOT_AVAILABLE:
+                mHandler.sendEmptyMessage(WIFI_NOT_AVAILABLE);
+                break;
             case STATE_NONE:
                 mHandler.sendEmptyMessage(RECEIVER_NOT_ON_SCAN_LIST);
                 break;

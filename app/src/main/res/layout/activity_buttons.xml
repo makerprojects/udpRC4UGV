@@ -3,6 +3,88 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <Button
+        android:id="@+id/forward"
+        android:layout_width="180dp"
+        android:layout_height="80dp"
+        android:layout_above="@+id/backward"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:gravity="start|center_vertical"
+        android:text="@string/forward"
+        android:textSize="20sp" />
+
+    <ImageButton
+        android:id="@+id/trim_forward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/forward"
+        android:layout_alignTop="@+id/forward"
+        android:adjustViewBounds="false"
+        android:contentDescription="@+id/app_name"
+        android:src="@drawable/arrow_button_up_43x43" />
+
+    <Button
+        android:id="@+id/backward"
+        android:layout_width="180dp"
+        android:layout_height="80dp"
+        android:gravity="start|center_vertical"
+        android:text="@string/backward"
+        android:textSize="20sp"
+        android:layout_below="@+id/right"
+        android:layout_marginTop="20sp" />
+
+    <ImageButton
+        android:id="@+id/trim_backward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/backward"
+        android:layout_alignTop="@+id/backward"
+        android:contentDescription="@+id/app_name"
+        android:paddingBottom="5dp"
+        android:src="@drawable/arrow_button_down_43x43" />
+
+    <Button
+        android:id="@+id/right"
+        android:layout_width="180dp"
+        android:layout_height="80dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/right"
+        android:textSize="20sp"
+        android:layout_marginTop="18dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageButton
+        android:id="@+id/trim_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/right"
+        android:layout_alignTop="@+id/right"
+        android:contentDescription="@+id/app_name"
+        android:src="@drawable/arrow_button_right_43x43" />
+
+    <Button
+        android:id="@+id/left"
+        android:layout_width="180dp"
+        android:layout_height="80dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/left"
+        android:textSize="20sp"
+        android:layout_below="@+id/right"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20sp" />
+
+    <ImageButton
+        android:id="@+id/trim_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/left"
+        android:layout_alignTop="@+id/left"
+        android:contentDescription="@+id/app_name"
+        android:src="@drawable/arrow_button_left_43x43" />
+
     <ImageView
         android:id="@+id/pikoder_logo"
         android:contentDescription="@+id/app_name"
@@ -12,68 +94,9 @@
         android:paddingBottom="5dp"
         android:paddingRight="5dp"
         android:paddingLeft="5dp"
-        android:src="@drawable/pikoder_logo"
-        android:layout_below="@+id/logo_final"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:id="@+id/forward"
-        android:layout_width="180dp"
-        android:layout_height="80dp"
-        android:gravity="left|center_vertical"
-        android:text="@string/forward"
-        android:textSize="20sp"
-        android:layout_above="@+id/backward"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:id="@+id/backward"
-        android:layout_width="180dp"
-        android:layout_height="80dp"
-        android:gravity="left|center_vertical"
-        android:text="@string/backward"
-        android:textSize="20sp"
-        android:layout_below="@+id/right"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="20sp" />
-
-    <Button
-        android:id="@+id/right"
-        android:layout_width="180dp"
-        android:layout_height="80dp"
-        android:gravity="right|center_vertical"
-        android:text="@string/right"
-        android:textSize="20sp"
-        android:layout_marginTop="18dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:id="@+id/left"
-        android:layout_width="180dp"
-        android:layout_height="80dp"
-        android:gravity="right|center_vertical"
-        android:text="@string/left"
-        android:textSize="20sp"
-        android:layout_below="@+id/right"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="20sp" />
-
-    <ImageView
-        android:id="@+id/logo_final"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="false"
-        android:alpha="0.35"
-        android:contentDescription="@+id/app_name"
-        android:cropToPadding="false"
-        android:paddingBottom="5dp"
-        android:src="@drawable/logo_final_small"
-        android:layout_alignTop="@+id/right"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:gravity="start|bottom"
+        android:src="@drawable/pikoder_logo" />
 
     <Button
         android:id="@+id/buttonCH7On"

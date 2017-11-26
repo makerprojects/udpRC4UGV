@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -40,6 +41,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,9 +54,11 @@ import java.util.TimerTask;
 public class ActivityWheel extends Activity implements SensorEventListener  {
 
 	private UdpServer udpServer = null;
+	private UdpReceiver udpReceiver = null;
 	private String udpReceiverHotSpotName;	// hotspot name provided by receiver
 
 	private Button buttonCH7On, buttonAUTO, buttonMANUAL,buttonLEARNING;
+	private ImageButton btn_trim_forward, btn_trim_backward, btn_trim_left, btn_trim_right;
 
 	private int xAxis = 0;
 	private int yAxis = 0;
@@ -73,6 +77,8 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 	private final String cChannelMax = "FE"; // equals 0xFE
 	private final String cChannelMin = "00";
 	private String host = "192.168.4.1"; // UDP receiver default address
+	private String rx_host = "192.168.4.2"; // UDP sender default address for responses (smart phone IP address) -> not relevant!
+	private String rx_port = "12000";		// application default port for responses to smart phone
 	private String localPort = "12000";
 	private String remotePort = "12001";			// application default port
 	private String networkPasskey = "PASSWORD";
@@ -82,10 +88,6 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 	private String commandRight = "FF017F";
 
 	private final int iChannelNeutral = 127;
-	private final int iChannelMax = 0xFE; // equals 0xFE
-	private final int iChannelMin = 0;
-
-	private final int pwnNeutral = 127;
 
 	private boolean sCommand;
 	private int iLastLeft = 255;
@@ -93,7 +95,6 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 
 	private boolean bCH7On_sent = false;
 	private boolean bCH7Off_sent = false;
-	private static StringBuilder sb = new StringBuilder();  // used to manage multi cycle messages
 
 	// additional specific defs for processing...
 	private SensorManager mSensorManager;
@@ -109,6 +110,10 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 	private int	intFMMode;
 	private String strFMChannel;
 
+	// trim function defs
+	static int iChannel1_neutral = 0;
+	static int iChannel2_neutral = 0;
+
 	private static String TAG = ActivityWheel.class.getSimpleName();
 
 	// fail safe related definitions
@@ -120,7 +125,13 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-		udpReceiverHotSpotName = (String) getResources().getText(R.string.default_udpReceiverHotSpotName);
+		Resources res = getResources();
+		mixing = res.getBoolean(R.bool.pref_Mixing);	// enable mixing
+		remotePort = res.getString(R.string.default_PORT); // application default port
+		localPort = res.getString(R.string.default_rxPORT);
+		host = res.getString(R.string.default_IP);   // UDP receiver default address
+		networkPasskey = res.getString(R.string.default_networkPasskey);
+		udpReceiverHotSpotName = res.getString(R.string.default_udpReceiverHotSpotName);	// hotspot name provided by receiver
 
         setContentView(R.layout.activity_wheel);
 		loadPref();
@@ -139,6 +150,10 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 		buttonAUTO = (Button) findViewById(R.id.buttonAUTO);
 		buttonLEARNING = (Button) findViewById(R.id.buttonLEARNING);
 		buttonMANUAL = (Button) findViewById(R.id.buttonMANUAL);
+		btn_trim_forward = (ImageButton) findViewById(R.id.trim_forward);
+		btn_trim_backward = (ImageButton) findViewById(R.id.trim_backward);
+		btn_trim_left = (ImageButton) findViewById(R.id.trim_left);
+		btn_trim_right = (ImageButton) findViewById(R.id.trim_right);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);          
@@ -253,7 +268,94 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 			}
 		});
 
-    }
+		btn_trim_backward.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel2_neutral == 0) {
+						iChannel2_neutral = 1;
+						sentCommand("N2?");
+						Toast.makeText(getBaseContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if (iChannel2_neutral >= 1004) {
+						iChannel2_neutral = iChannel2_neutral - 4;
+						sentCommand("N2=" + Integer.toString(iChannel2_neutral));
+						sentCommand("0x" + cRightHeader + cChannelNeutral);
+					} else {
+						if (iChannel2_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached minmium trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+
+		btn_trim_forward.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel2_neutral == 0) {
+						iChannel2_neutral = 1;
+						sentCommand("N2?");
+						Toast.makeText(getApplicationContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if (iChannel2_neutral < 1997) {
+						iChannel2_neutral = iChannel2_neutral + 4;
+						sentCommand("N2=" + Integer.toString(iChannel2_neutral));
+						sentCommand("0x" + cRightHeader + cChannelNeutral);
+					} else {
+						if (iChannel2_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached maximum trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+
+		btn_trim_right.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel1_neutral == 0) {
+						iChannel1_neutral = 1;
+						sentCommand("N1?");
+						Toast.makeText(getBaseContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if (iChannel1_neutral >= 1004) {
+						iChannel1_neutral = iChannel1_neutral - 4;
+						sentCommand("N1=" + Integer.toString(iChannel1_neutral));
+						sentCommand("0x" + cLeftHeader + cChannelNeutral);
+					} else {
+						if (iChannel1_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached minmium trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+
+		btn_trim_left.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (iChannel1_neutral == 0) {
+						iChannel1_neutral = 1;
+						sentCommand("N1?");
+						Toast.makeText(getApplicationContext(), "Retrieving value from PiKoder...", Toast.LENGTH_SHORT).show();
+					}
+					if ((iChannel1_neutral < 1997) && (iChannel1_neutral >= 1000)) {
+						iChannel1_neutral = iChannel1_neutral + 4;
+						sentCommand("N1=" + Integer.toString(iChannel1_neutral));
+						sentCommand("0x" + cLeftHeader + cChannelNeutral);
+					} else {
+						if (iChannel1_neutral > 1) {
+							Toast.makeText(getBaseContext(), "Reached maximum trim value...", Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+				return false;
+			}
+		});
+	}
     
     private static class MyHandler extends Handler {
         private final WeakReference<ActivityWheel> mActivity;
@@ -264,23 +366,27 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
      
         @Override
         public void handleMessage(Message msg) {
-			boolean suppressMessage = false;
         	ActivityWheel activity = mActivity.get();
 			if (activity != null) {
 				switch (msg.what) {
-					case UdpReceiver.RECEIVE_MESSAGE:								// if message is received
-						String strIncom = new String((byte[]) msg.obj, msg.arg2, msg.arg1);
-						strIncom = strIncom.replace("\r","").replace("\n","");
-						sb.append(strIncom);								// append string
-						Log.v(TAG, "Newly received: " + strIncom + "sb: " + sb.toString());
+					case UdpServer.RECEIVE_MESSAGE:								// if message is received
+						String strIncom = (String) msg.obj;
+						Log.d(TAG, "Received: " + strIncom );
 						if (strIncom.equals("?")) { // received '?' as errormessage
 							Toast.makeText(activity.getBaseContext(), "Last command could not be executed!", Toast.LENGTH_SHORT).show();
 						} else {
-							if (!strIncom.equals("!")) { // did not received acknoledge
-								Toast.makeText(activity.getBaseContext(), "Newly received: " + strIncom + "sb: " + sb.toString(), Toast.LENGTH_SHORT).show();
+							if (strIncom.equals("!")) { // did receive acknowledge
+							} else {
+								if (strIncom.length() >= 4) {
+									if (iChannel1_neutral ==1) {
+										iChannel1_neutral = Integer.parseInt(strIncom.toString());
+										Log.d(TAG, "Neutral set to: " + String.valueOf(iChannel1_neutral));
+									} else {
+										iChannel2_neutral = Integer.parseInt(strIncom.toString());
+									}
+								}
 							}
 						}
-						sb.delete(0, sb.length());
 						break;
 					case UdpServer.WIFI_NOT_AVAILABLE:
 						Log.d(UdpServer.TAG, "Wifi not available (Android system setting). Exit");
@@ -380,8 +486,6 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
         
         if(yAxis > pwmMax) yAxis = pwmMax;
         else if(yAxis < -pwmMax) yAxis = -pwmMax;		// negative - tilt forward 
-        else if(yAxis >= 0 && yAxis < yThreshold) yAxis = 0;
-        else if(yAxis < 0 && yAxis > -yThreshold) yAxis = 0;
 
 		if (mixing) {
 			if (xAxis > 0) {        // if tilt to left, slow down the left engine
@@ -505,6 +609,13 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 		suppressMessage = false;
 		udpServer.udpConnect(udpReceiverHotSpotName, networkPasskey);
     	mSensorManager.registerListener(this, mAccel, SensorManager.SENSOR_DELAY_NORMAL);
+		if (udpReceiver == null) {
+			Log.v(TAG, "Restarting receiver...");
+			String uriString = "udp://" + rx_host + ":" + rx_port + "/";
+			Uri uri = Uri.parse(uriString);
+			udpReceiver = new UdpReceiver();
+			udpReceiver.runUdpReceiver(uri, this, mHandler);
+		}
 		// start timer onResume if set
 		if (iTimeOut > 0) {
 			startTimer();
@@ -518,6 +629,10 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 		suppressMessage = true;
 		stopTimer();
 		udpServer.udpServer_onPause();
+		if (udpReceiver != null) {
+			udpReceiver.stopUdpReceiver();
+			udpReceiver = null;
+		}
     }
     
     @Override

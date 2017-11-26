@@ -21,7 +21,9 @@ package com.udprc4ugv;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.net.DatagramPacket;
@@ -30,14 +32,15 @@ import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Build;
 
+import static com.udprc4ugv.UdpServer.RECEIVE_MESSAGE;
+
 public class UdpReceiver  {
 
     private AsyncTask<Void, Void, Void> async;
     private static String TAG = UdpReceiver.class.getSimpleName();
-    public final static int RECEIVE_MESSAGE = 5;			// receive message
     DatagramSocket ds = null;
 
-    @SuppressLint("NewApi")
+    @SuppressLint({"NewApi", "StaticFieldLeak"})
     public void runUdpReceiver(final Uri uri, final Context context, final Handler handler) {
             async = new AsyncTask<Void, Void, Void>()
             {
@@ -48,12 +51,30 @@ public class UdpReceiver  {
                     byte[] lMsg = new byte[4096];
                     DatagramPacket dp = new DatagramPacket(lMsg, lMsg.length);
                     try {
+                        int i;
+                        String sBuilder = "";
                         ds = new DatagramSocket(uri.getPort());
                         Log.v(TAG, "Created DatagramSocket at port: " + uri.getPort());
                         while(true) {
+                            i = 0;
                             ds.receive(dp);
                             Log.v(TAG, "Server active... received packet" + new String(dp.getData(), dp.getOffset(), dp.getLength()));
-                            handler.obtainMessage(RECEIVE_MESSAGE, dp.getLength(), dp.getOffset(), dp.getData()).sendToTarget();
+                            sBuilder = sBuilder.concat(new String(dp.getData(), dp.getOffset(), dp.getLength()));
+                            if (sBuilder.length()>0) {
+                                if (sBuilder.charAt(i++) == '\r') {
+                                    if (sBuilder.length()>1) {
+                                        if (sBuilder.charAt(i++) == '\n') {
+                                            while (sBuilder.length() > i) {
+                                                if (sBuilder.charAt(i++) == '\n') {
+                                                    sBuilder = sBuilder.replace("\r","").replace("\n","");
+                                                    handler.obtainMessage(RECEIVE_MESSAGE, sBuilder.length(), 0, sBuilder).sendToTarget();
+                                                    sBuilder = "";
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     catch (Exception e) {

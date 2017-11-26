@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- General settings:
+    -->
+    <!-- Show debug information
+    -->
+    <bool name="pref_Debug">false</bool>
+    <!-- mixing enabled
+     -->
+    <bool name="pref_Mixing">true</bool>
+
+</resources>

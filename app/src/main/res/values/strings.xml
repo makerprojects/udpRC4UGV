@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">udpRC4UGV</string>
-    <string name="app_name_version">udpRC4UGV 1.1</string>
+    <string name="app_name_version">udpRC4UGV 1.2</string>
     <string name="menu_app_settings">APP Settings</string>
     <string name="menu_ssc_settings">SSC Settings</string>
     <string name="menu_about">About udpRC4UGV</string>
@@ -19,7 +19,7 @@
     <string name="plugin_name">udpRC4UGV - UDP Sender</string>
 
     <string name="info_text">Tilt your device</string>
-    <string name="info_text_wheel">Pinch speed\'s slider and tilt device \nleft&#47;right for turning</string>
+    <string name="info_text_wheel">Pinch speed\'s slider\nand tilt device \nleft&#47;right for turning</string>
     
     <string name="btn_accel">Accelerometer control</string>
     <string name="btn_wheel">Wheel control</string>    

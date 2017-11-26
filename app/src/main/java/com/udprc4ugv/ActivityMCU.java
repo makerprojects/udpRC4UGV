@@ -40,7 +40,6 @@ import android.widget.Toast;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 
-import static java.lang.Integer.parseInt;
 
 
 public class ActivityMCU extends Activity {
@@ -58,7 +57,6 @@ public class ActivityMCU extends Activity {
 	private static EditText edit_AutoOFF;
 	private static String flash_success;
 	private static String error_get_data;
-	private static StringBuilder sb = new StringBuilder();  // used to manage multi cycle messages
 	private static String TAG = ActivityMCU.class.getSimpleName();
 	private static boolean suppressMessage = false;
 
@@ -154,34 +152,27 @@ public class ActivityMCU extends Activity {
         	ActivityMCU activity = mActivity.get();
         	if (activity != null) {
         	  switch (msg.what) {
-	            case UdpReceiver.RECEIVE_MESSAGE:								// if message is received
-	            	String strIncom = new String((byte[]) msg.obj, msg.arg2, msg.arg1);
-					strIncom = strIncom.replace("\r","").replace("\n","");
-	            	sb.append(strIncom);								// append string
-	            	
-	            	float myNum = 9999;
+	            case UdpServer.RECEIVE_MESSAGE:								// if message is received
+	            	String strIncom = (String) msg.obj;
+					Log.v(TAG, "Received: " + msg.obj);
 
-					Log.v(TAG, "Newly received: " + strIncom + "sb: " + sb.toString());
-
-					if (strIncom.equals("!")) { // received '!' as acknoledge of flushing
+					if (strIncom.equals("!")) { // received '!' as acknowledge of flushing
 							Toast.makeText(activity.getBaseContext(), flash_success, Toast.LENGTH_SHORT).show();
-							sb.delete(0, sb.length());
 					}
 
-					if (sb.length() >= 3) {
+					float myNum = 9999;
+					if (strIncom.length() >= 3) {
 						try {
-							myNum = Float.parseFloat(sb.toString());
+							myNum = Float.parseFloat(strIncom.toString());
 						} catch (NumberFormatException nfe) {
 							Toast.makeText(activity.getBaseContext(), "Could not parse " + nfe, Toast.LENGTH_SHORT).show();
-							sb.delete(0, sb.length());
 						}
 					}
 
 	            	if (myNum < 1000) {
 	            		Float edit_data_AutoOFF = myNum/10;
 	            		edit_AutoOFF.setText(String.valueOf(edit_data_AutoOFF));
-						sb.delete(0, sb.length());
-	            		if (edit_data_AutoOFF != 0)  cb_AutoOFF.setChecked(true); 
+	            		if (edit_data_AutoOFF != 0)  cb_AutoOFF.setChecked(true);
 	            		else cb_AutoOFF.setChecked(false);
 		            	Toast.makeText(activity.getBaseContext(), "Reading timeout data completed", Toast.LENGTH_SHORT).show();
 	                }
