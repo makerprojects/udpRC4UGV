@@ -19,19 +19,27 @@
 
 package com.udprc4ugv;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 /**
  * This class does all the work for setting up and managing udp
@@ -44,6 +52,7 @@ public class UdpServer {
     // Debugging
     public static String TAG = UdpServer.class.getSimpleName();  // used in other modules to indicate bluetooth error conditions
     private static final boolean D = true;
+    private static boolean ScanPermissionGranted = false;
     final Handler toastHandler = new Handler();
 
     // Member fields
@@ -62,6 +71,7 @@ public class UdpServer {
 
     // statuses for Handler
     public final static int WIFI_NOT_AVAILABLE = 1;            // wifi is not available
+    public final static int MISSING_PERMISSION_TO_ACCESS_LOCATION = 11; // runtime change Android 6
     public final static int RECEIVER_NOT_ON_SCAN_LIST = 10; // did not find receiver on scan list..
     public final static int WIFI_INCORRECT_ADDRESS = 2;        // incorrect IP-address
     public final static int WIFI_REQUEST_ENABLE = 3;        // request enable wifi
@@ -119,47 +129,55 @@ public class UdpServer {
         if (D) Log.d(TAG, "start udpConnect with state " + mState);
         mHandler.sendEmptyMessage(WIFI_REQUEST_ENABLE);
         WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        List<ScanResult> scanResultList = wifiManager.getScanResults();
-        for (ScanResult result : scanResultList) {
-            if (D) Log.d(TAG, "scanned: " + result.SSID);
-            if (result.SSID.equals(udpHotSpotName)) {
-                String securityMode = getScanResultSecurity(result);
-                WifiConfiguration wifiConfiguration = createAPConfiguration(udpHotSpotName, networkPasskey, securityMode);
-                if (D) Log.d(TAG, "ap is on!");
-                mState = STATE_AVAILABLE;
-                List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-                if (list == null) {
-                    mState = WIFI_NOT_AVAILABLE;
-                } else {
-                    for (WifiConfiguration i : list) {
-                        if (D) Log.d(TAG, "configured: " + i.SSID);
-                        if (i.SSID != null && i.SSID.equals("\"" + udpHotSpotName + "\"")) {
-                            mState = STATE_CONFIGURED;
-                            apId = i.networkId;
-                            if (D) Log.d(TAG, i.SSID + " already configured!");
-                            break;
-                        }
-                    }
-                    if (mState < STATE_CONFIGURED) {
-                        apId = wifiManager.addNetwork(wifiConfiguration);
-                        if (D) Log.d(TAG, "added network, id is: " + apId);
-                    }
-                    boolean b = wifiManager.enableNetwork(apId, true);
-                    if (D) Log.d(TAG, "enable network returned: " + b);
-                    wifiManager.setWifiEnabled(true);
-                    boolean changeHappen = wifiManager.saveConfiguration();
-                    if (apId != -1 && changeHappen) {
-                        Log.d(TAG, "connecting to: " + result.SSID);
-                        mState = STATE_CONNECTING;
+        try {
+            List<ScanResult> scanResultList = wifiManager.getScanResults();
+            for (ScanResult result : scanResultList) {
+                if (D) Log.d(TAG, "scanned: " + result.SSID);
+                if (result.SSID.equals(udpHotSpotName)) {
+                    String securityMode = getScanResultSecurity(result);
+                    WifiConfiguration wifiConfiguration = createAPConfiguration(udpHotSpotName, networkPasskey, securityMode);
+                    if (D) Log.d(TAG, "ap is on!");
+                    mState = STATE_AVAILABLE;
+                    List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+                    if (list == null) {
+                        mState = WIFI_NOT_AVAILABLE;
                     } else {
-                        mState = STATE_COULD_NOT_CONNECT;
+                        for (WifiConfiguration i : list) {
+                            if (D) Log.d(TAG, "configured: " + i.SSID);
+                            if (i.SSID != null && i.SSID.equals("\"" + udpHotSpotName + "\"")) {
+                                mState = STATE_CONFIGURED;
+                                apId = i.networkId;
+                                if (D) Log.d(TAG, i.SSID + " already configured!");
+                                break;
+                            }
+                        }
+                        if (mState < STATE_CONFIGURED) {
+                            apId = wifiManager.addNetwork(wifiConfiguration);
+                            if (D) Log.d(TAG, "added network, id is: " + apId);
+                        }
+                        boolean b = wifiManager.enableNetwork(apId, true);
+                        if (D) Log.d(TAG, "enable network returned: " + b);
+                        wifiManager.setWifiEnabled(true);
+                        boolean changeHappen = wifiManager.saveConfiguration();
+                        if (apId != -1 && changeHappen) {
+                            Log.d(TAG, "connecting to: " + result.SSID);
+                            mState = STATE_CONNECTING;
+                        } else {
+                            mState = STATE_COULD_NOT_CONNECT;
+                        }
                     }
                 }
             }
+        } catch (SecurityException e) {
+            mState = MISSING_PERMISSION_TO_ACCESS_LOCATION;
         }
+
         switch (mState) {
             case WIFI_NOT_AVAILABLE:
                 mHandler.sendEmptyMessage(WIFI_NOT_AVAILABLE);
+                break;
+            case MISSING_PERMISSION_TO_ACCESS_LOCATION:
+                mHandler.sendEmptyMessage(MISSING_PERMISSION_TO_ACCESS_LOCATION);
                 break;
             case STATE_NONE:
                 mHandler.sendEmptyMessage(RECEIVER_NOT_ON_SCAN_LIST);

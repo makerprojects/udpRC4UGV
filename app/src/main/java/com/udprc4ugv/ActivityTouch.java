@@ -19,10 +19,12 @@
 
 package com.udprc4ugv;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -32,10 +34,13 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -318,6 +323,7 @@ public class ActivityTouch extends Activity {
 				return false;
 			}
 		});
+
 	}
 
 	private static class MyHandler extends Handler {
@@ -355,6 +361,11 @@ public class ActivityTouch extends Activity {
 					case UdpServer.WIFI_NOT_AVAILABLE:
 						Log.d(UdpServer.TAG, "Wifi not available (Android system setting). Exit");
 						Toast.makeText(activity.getBaseContext(), "Wifi not available (Android system setting). Exit", Toast.LENGTH_SHORT).show();
+						activity.finish();
+						break;
+					case UdpServer.MISSING_PERMISSION_TO_ACCESS_LOCATION:
+						Log.d(UdpServer.TAG, "Missing Permission to access position (Android >= 6). Exit");
+						Toast.makeText(activity.getBaseContext(), "Missing Android permission - Access to location required. Exit)", Toast.LENGTH_SHORT).show();
 						activity.finish();
 						break;
 					case UdpServer.RECEIVER_NOT_ON_SCAN_LIST:

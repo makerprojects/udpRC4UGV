@@ -393,6 +393,11 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 						Toast.makeText(activity.getBaseContext(), "Wifi not available (Android system setting). Exit", Toast.LENGTH_SHORT).show();
 						activity.finish();
 						break;
+					case UdpServer.MISSING_PERMISSION_TO_ACCESS_LOCATION:
+						Log.d(UdpServer.TAG, "Missing Permission to access position (Android >= 6). Exit");
+						Toast.makeText(activity.getBaseContext(), "Missing Android permission - Access to location required. Exit)", Toast.LENGTH_SHORT).show();
+						activity.finish();
+						break;
 					case UdpServer.RECEIVER_NOT_ON_SCAN_LIST:
 						Log.d(UdpServer.TAG, "AP is not on current scan list. Exit");
 						Toast.makeText(activity.getBaseContext(), "Receiver is not offered by Android system scan", Toast.LENGTH_SHORT).show();
