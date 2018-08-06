@@ -82,10 +82,10 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 	private String localPort = "12000";
 	private String remotePort = "12001";			// application default port
 	private String networkPasskey = "PASSWORD";
-	private final String cLeftHeader = "FF00";
-	private final String cRightHeader = "FF01";
-	private String commandLeft = "FF007F";    // make sure we init the string to avoid problem w/o mixing
-	private String commandRight = "FF017F";
+	private String commandLeft;
+	private String commandRight;
+	private String cLeftHeader;
+	private String cRightHeader;
 
 	private final int iChannelNeutral = 127;
 
@@ -114,6 +114,10 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 	static int iChannel1_neutral = 0;
 	static int iChannel2_neutral = 0;
 
+	// defs for PPM frame position
+	private String DirectionRXChannel;
+	private String ThrottleRXChannel;
+
 	private static String TAG = ActivityWheel.class.getSimpleName();
 
 	// fail safe related definitions
@@ -132,9 +136,17 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 		host = res.getString(R.string.default_IP);   // UDP receiver default address
 		networkPasskey = res.getString(R.string.default_networkPasskey);
 		udpReceiverHotSpotName = res.getString(R.string.default_udpReceiverHotSpotName);	// hotspot name provided by receiver
+		DirectionRXChannel = res.getString(R.string.default_channelLeftRight);
+		ThrottleRXChannel = res.getString(R.string.default_channelForwardBackward);
 
-        setContentView(R.layout.activity_wheel);
+		setContentView(R.layout.activity_wheel);
 		loadPref();
+
+		commandLeft = "FF0" + String.valueOf(Integer.valueOf(DirectionRXChannel) -1) + "7F";    // make sure we init the string to avoid problem w/o mixing
+		commandRight = "FF0" + String.valueOf(Integer.valueOf(ThrottleRXChannel) -1) + "7F";
+
+		cRightHeader = "FF0" + String.valueOf(Integer.valueOf(ThrottleRXChannel) -1);
+		cLeftHeader = "FF0" + String.valueOf(Integer.valueOf(DirectionRXChannel) -1);
 
 		if (FM_AUTO_PWM.length() < 4) {
 			FM_AUTO_PWM = "0" + FM_AUTO_PWM;
@@ -390,17 +402,17 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 						break;
 					case UdpServer.WIFI_NOT_AVAILABLE:
 						Log.d(UdpServer.TAG, "Wifi not available (Android system setting). Exit");
-						Toast.makeText(activity.getBaseContext(), "Wifi not available (Android system setting). Exit", Toast.LENGTH_SHORT).show();
+						Toast.makeText(activity.getBaseContext(), "Wifi not available (Android system setting). Exit", Toast.LENGTH_LONG).show();
 						activity.finish();
 						break;
 					case UdpServer.MISSING_PERMISSION_TO_ACCESS_LOCATION:
 						Log.d(UdpServer.TAG, "Missing Permission to access position (Android >= 6). Exit");
-						Toast.makeText(activity.getBaseContext(), "Missing Android permission - Access to location required. Exit)", Toast.LENGTH_SHORT).show();
+						Toast.makeText(activity.getBaseContext(), "Missing Android permission - Access to location required. Exit)", Toast.LENGTH_LONG).show();
 						activity.finish();
 						break;
 					case UdpServer.RECEIVER_NOT_ON_SCAN_LIST:
 						Log.d(UdpServer.TAG, "AP is not on current scan list. Exit");
-						Toast.makeText(activity.getBaseContext(), "Receiver is not offered by Android system scan", Toast.LENGTH_SHORT).show();
+						Toast.makeText(activity.getBaseContext(), "Receiver is not offered by Android system scan", Toast.LENGTH_LONG).show();
 						activity.finish();
 						break;
 					case UdpServer.WIFI_INCORRECT_ADDRESS:
@@ -606,6 +618,8 @@ public class ActivityWheel extends Activity implements SensorEventListener  {
 		FM_MANUAL_PWM = mySharedPreferences.getString("defaultFlightMode_MANUAL_PWMValue", getString(R.string.defaultFM_MANUAL_PWM));
 		intFMMode = Integer.valueOf(mySharedPreferences.getString("defaultFlightMode", getString(R.string.default_FlightMode)));
 		strFMChannel = mySharedPreferences.getString("defaultFlightModeChannel", getString(R.string.default_FlightModeOutput));
+		DirectionRXChannel = mySharedPreferences.getString("pref_channelLeftRight", DirectionRXChannel);
+		ThrottleRXChannel = mySharedPreferences.getString("pref_channelForwardBackward", ThrottleRXChannel);
 	}
     
     @Override

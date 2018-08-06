@@ -19,22 +19,20 @@
 
 package com.udprc4ugv;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
-import android.os.Build;
 
 import static com.udprc4ugv.UdpServer.RECEIVE_MESSAGE;
 
-public class UdpReceiver  {
+public class UdpReceiver {
 
     private AsyncTask<Void, Void, Void> async;
     private static String TAG = UdpReceiver.class.getSimpleName();
@@ -67,7 +65,10 @@ public class UdpReceiver  {
                                             while (sBuilder.length() > i) {
                                                 if (sBuilder.charAt(i++) == '\n') {
                                                     sBuilder = sBuilder.replace("\r","").replace("\n","");
-                                                    handler.obtainMessage(RECEIVE_MESSAGE, sBuilder.length(), 0, sBuilder).sendToTarget();
+                                                    Activity activity = (Activity) context;
+                                                    if (!activity.isFinishing()) {
+                                                        handler.obtainMessage(RECEIVE_MESSAGE, sBuilder.length(), 0, sBuilder).sendToTarget();
+                                                    }
                                                     sBuilder = "";
                                                 }
                                             }
@@ -97,7 +98,9 @@ public class UdpReceiver  {
 
     public void stopUdpReceiver() {
         Log.v(TAG, "Stop receiver...");
-        ds.close(); // ds would be blocked -> we exit with caught exception
+        if (ds != null) {
+            ds.close();
+        }
     }
 }
 

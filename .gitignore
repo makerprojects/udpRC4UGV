@@ -129,3 +129,8 @@ fabric.properties
 .idea/copyright/
 app/libs/
 app/src/main/res/mipmap-ldpi/
+*.ser
+.idea/codeStyles/Project.xml
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.properties
+app/release/output.json

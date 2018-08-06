@@ -33,6 +33,19 @@
 			android:summary="Mixing activated"
 			android:defaultValue="true" />
 
+		<com.udprc4ugv.EditChannelPreference
+			android:key="pref_channelLeftRight"
+			android:title="Channel selection direction"
+			android:summary="(APM default = 1)"
+			android:defaultValue="@string/default_channelLeftRight" />
+
+		<com.udprc4ugv.EditChannelPreference
+			android:key="pref_channelForwardBackward"
+			android:title="Channel selection throttle"
+			android:summary="(APM default = 3)"
+			android:defaultValue="@string/default_channelForwardBackward" />
+
+
 	</PreferenceCategory>
 
 	<PreferenceCategory
