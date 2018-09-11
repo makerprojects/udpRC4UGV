@@ -527,7 +527,7 @@ public class ActivityButtons extends Activity {
 		uriString += Uri.encode(commandString);
 		Uri uri = Uri.parse(uriString);
 		UdpSender udpSender = new UdpSender();
-		udpSender.SendTo(this.getApplicationContext(), uri);
+		udpSender.SendTo(uri);
 	}
 
 	private void loadPref() {

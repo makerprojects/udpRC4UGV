@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General settings:
+    -->
+    <!-- magnitude of steps; equals miniSSC range
+    -->
+    <integer name="default_pwmMax">126</integer>
+
+    <!-- definition of minimal and maximal pulse width for trim
+    -->
+    <integer name="default_pwmUpper">2500</integer>
+    <integer name="default_pwmLower">500</integer>
+
+    <!-- definition of pwm pulse width for lights (channel 3)
+     -->
+    <integer name="default_pwmLightsOn">1950</integer>
+    <integer name="default_pwmLightsOff">1500</integer>
+
+    <!-- definition of pwm pulse width for AUX1 (channel 6)
+    -->
+    <integer name="default_pwmAUX1On">1950</integer>
+    <integer name="default_pwmAUX1Off">1500</integer>
+
+    <!-- definition of pwm pulse width for AUX2 (channel 7)
+    -->
+    <integer name="default_pwmAUX2On">1950</integer>
+    <integer name="default_pwmAUX2Off">1500</integer>
+
+    <!-- definition of pwm pulse width for AUX3 (channel 8)
+     -->
+    <integer name="default_pwmAUX3On">1950</integer>
+    <integer name="default_pwmAUX3Off">1500</integer>
+
+    <!-- minimal threshold before sending command
+     -->
+    <integer name="default_yThreshold">50</integer>
+
+
+    <!-- Touch control settings:
+    -->
+    <!-- Pivot point for motor (in percent), above which one motor rotate in the opposite direction
+    -->
+    <integer name="default_xRperc">50</integer>
+
+    <!-- Layout settings:
+    -->
+    <integer name="Stick2TrimRatio">4</integer>
+    <integer name="HorizontalTrimColumnWidth">2</integer>
+    <integer name="Stick2SwitchesRatio">2</integer>
+    <integer name="ColumnWeightFactor">7</integer>  <!-- 6 + 1 defines Column weight -->
+    <integer name="StickColumnWeightFactor">12</integer>  <!-- Column weight * Stick2Switches-->
+
+
+    <!-- Accelerometer control settings:
+    -->
+    <!-- Threshold and sensitivity for the Y axis; currently not unanimous
+    -->
+    <integer name="default_yMax">5</integer>
+    <!-- Threshold and sensitivity for the X axis; currently not unanimous
+    -->
+    <integer name="default_xMax">7</integer>
+    <!-- Pivot point for motor (x axis), above which one motor rotate in the opposite direction
+    -->
+    <integer name="default_xR">5</integer>
+    <!-- Pivot point for motor (x axis), above which one motor rotate in the opposite direction
+    -->
+
+</resources>

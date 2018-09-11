@@ -237,7 +237,7 @@ public class ActivityMCU extends Activity {
 		uriString += Uri.encode(str2sent);
 		Uri uri = Uri.parse(uriString);
 		UdpSender udpSender = new UdpSender();
-		udpSender.SendTo(this.getApplicationContext(), uri);
+		udpSender.SendTo(uri);
 	}
 
 

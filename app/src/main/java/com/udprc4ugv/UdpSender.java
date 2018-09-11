@@ -33,7 +33,7 @@ public class UdpSender {
 //    final Handler toastHandler = new Handler();
     private static String TAG = UdpSender.class.getSimpleName();
 
-    public synchronized void SendTo(final Context context, final Uri uri) {
+    public synchronized void SendTo(final Uri uri) {
 
         if (uri == null) return;
         String msg = Uri.decode(uri.getLastPathSegment());

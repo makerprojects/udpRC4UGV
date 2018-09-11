@@ -124,6 +124,7 @@ public class ActivityTouch extends Activity {
 	private String ThrottleRXChannel;
 
 	MyView v1;
+	Joystick vStickLeft;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,6 +142,8 @@ public class ActivityTouch extends Activity {
 
 		setContentView(activity_touch);
         loadPref();
+
+		String uriString = "udp://" + host + ":" + remotePort + "/";
 
 		commandLeft = "FF0" + String.valueOf(Integer.valueOf(DirectionRXChannel) -1) + "7F";    // make sure we init the string to avoid problem w/o mixing
 		commandRight = "FF0" + String.valueOf(Integer.valueOf(ThrottleRXChannel) -1) + "7F";
@@ -167,8 +170,11 @@ public class ActivityTouch extends Activity {
 		btn_trim_left = (ImageButton) findViewById(R.id.trim_left);
 		btn_trim_right = (ImageButton) findViewById(R.id.trim_right);
 		RelativeLayout canvasLayout = (RelativeLayout) findViewById(R.id.canvasLayout);
-		v1 = new MyView(this);
-		canvasLayout.addView(v1);
+		vStickLeft = new Joystick(this, 0, 1, mixing, true, true, false, false, uriString);
+
+		// v1 = new MyView(this);
+		// canvasLayout.addView(v1);
+		canvasLayout.addView(vStickLeft);
 
 		Globals g = Globals.getInstance();	// load timeout form global variable
 		iTimeOut = g.getData();
@@ -735,7 +741,7 @@ public class ActivityTouch extends Activity {
 		uriString += Uri.encode(commandString);
 		Uri uri = Uri.parse(uriString);
 		UdpSender udpSender = new UdpSender();
-		udpSender.SendTo(this.getApplicationContext(), uri);
+		udpSender.SendTo(uri);
 	}
 
     private void loadPref(){

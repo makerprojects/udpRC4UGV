@@ -9,13 +9,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
         android:alpha="0.3"
         android:contentDescription="@+id/app_name"
         android:paddingBottom="5dp"
         android:paddingRight="5dp"
         android:src="@drawable/pikoder_logo" />
 
+    <RelativeLayout
+        android:id="@+id/canvasLayout"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/pikoder_logo"
+        android:layout_below="@id/trim_right"
+        android:layout_above="@id/pikoder_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+    </RelativeLayout>
+
+<!--
+    <RelativeLayout
+        android:id="@+id/placeholder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/canvasLayout"
+        android:layout_toStartOf="@+id/textView5">
+    </RelativeLayout>
+-->
     <Button
         android:id="@+id/buttonCH7On"
         android:layout_width="wrap_content"
@@ -131,15 +150,7 @@
         android:textColor="#FFFFFF"
         android:textStyle="bold" />
 
-
-    <RelativeLayout
-        android:id="@+id/canvasLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/trim_left">
-
-
-    </RelativeLayout>
-
 </RelativeLayout>
+
+
+
