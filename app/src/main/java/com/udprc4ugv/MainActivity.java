@@ -19,13 +19,17 @@
 
 package com.udprc4ugv;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +38,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener {
+
+	public final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
 
 	Button btnActAccelerometer, btnActWheel, btnActButtons, btnActTouch;
 	WifiManager mainWifi;
@@ -70,34 +76,44 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	public void onClick(View v) {
-		switch (v.getId()) {
-	    case R.id.button_accel:
-			Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
-			v.invalidate();
-	    	Intent intent_accel = new Intent(this, ActivityAccelerometer.class);
-	    	startActivity(intent_accel);
-	    	break;
-	    case R.id.button_wheel:
-			Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
-			v.invalidate();
-	    	Intent intent_wheel = new Intent(this, ActivityWheel.class);
-	    	startActivity(intent_wheel);
-	    	break;
-	    case R.id.button_buttons:
-			Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
-			v.invalidate();
-	    	Intent intent_buttons = new Intent(this, ActivityButtons.class);
-	    	startActivity(intent_buttons);
-	    	break;
-	    case R.id.button_touch:
-			Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
-			v.invalidate();
-	    	Intent intent_touch = new Intent(this, ActivityTouch.class);
-	    	startActivity(intent_touch);
-	    	break;
-	    default:
-	    	break;
-	    }
+		// check for permissions as required for Android 6.0 and beyond
+		if (ContextCompat.checkSelfPermission(this,
+				Manifest.permission.ACCESS_COARSE_LOCATION)
+				!= PackageManager.PERMISSION_GRANTED) {
+			// request the permission before starting to connect, finish if not granted.
+			ActivityCompat.requestPermissions(this,
+					new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+					MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+		} else { // permission is granted
+			switch (v.getId()) {
+				case R.id.button_accel:
+					Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
+					v.invalidate();
+					Intent intent_accel = new Intent(this, ActivityAccelerometer.class);
+					startActivity(intent_accel);
+					break;
+				case R.id.button_wheel:
+					Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
+					v.invalidate();
+					Intent intent_wheel = new Intent(this, ActivityWheel.class);
+					startActivity(intent_wheel);
+					break;
+				case R.id.button_buttons:
+					Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
+					v.invalidate();
+					Intent intent_buttons = new Intent(this, ActivityButtons.class);
+					startActivity(intent_buttons);
+					break;
+				case R.id.button_touch:
+					Toast.makeText(getApplicationContext(), "Started connecting to ap...", Toast.LENGTH_SHORT).show();
+					v.invalidate();
+					Intent intent_touch = new Intent(this, ActivityTouch.class);
+					startActivity(intent_touch);
+					break;
+				default:
+					break;
+			}
+		}
 	}
 
 	@Override
@@ -124,6 +140,25 @@ public class MainActivity extends Activity implements OnClickListener {
 				return true;
 		}
 		return true;
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode,
+										   String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION: {
+				// If request is cancelled, the result arrays are empty.
+				if (grantResults.length > 0
+						&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					// permission was granted, yay!
+				} else {
+					// permission denied, boo! Disable the
+					// functionality that depends on this permission.
+					this.finish();
+				}
+				return;
+			}
+		}
 	}
 
 	@Override
