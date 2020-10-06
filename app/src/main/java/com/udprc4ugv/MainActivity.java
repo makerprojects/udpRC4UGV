@@ -1,5 +1,5 @@
 /*
- *  (C) Copyright 2017 Gregor Schlechtriem (http://www.pikoder.com).
+ *  (C) Copyright 2017-2020 Gregor Schlechtriem (http://www.pikoder.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,13 +21,16 @@ package com.udprc4ugv;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.Menu;
@@ -72,7 +75,16 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	    btnActTouch = (Button) findViewById(R.id.button_touch);
 	    btnActTouch.setOnClickListener(this);
-	    
+
+		// check for permissions as required for Android 6.0 and beyond
+		if (ContextCompat.checkSelfPermission(this,
+				Manifest.permission.ACCESS_COARSE_LOCATION)
+				!= PackageManager.PERMISSION_GRANTED) {
+			// request the permission before starting to connect, finish if not granted.
+			ActivityCompat.requestPermissions(this,
+					new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+					MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+		}
 	}
 
 	public void onClick(View v) {
@@ -144,21 +156,32 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode,
-										   String permissions[], int[] grantResults) {
-		switch (requestCode) {
-			case MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION: {
-				// If request is cancelled, the result arrays are empty.
-				if (grantResults.length > 0
-						&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					// permission was granted, yay!
-				} else {
-					// permission denied, boo! Disable the
-					// functionality that depends on this permission.
-					this.finish();
-				}
-				return;
-			}
+										   @NonNull String[] permissions, @NonNull int[] grantResults) {
+		if (requestCode != MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION) {
+			return;
 		}
+		// If request is not processed yet, the result arrays are empty.
+		if (permissions.length ==0) {
+			return;
+		}
+		if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+			// permission was granted, yay!
+		} else {
+			// permission denied, boo! Disable the
+			// functionality that depends on this permission.
+			AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+			alertDialog.setTitle("Permission Location missing");
+			alertDialog.setMessage("udpRC4UGV will be unable to connect to receiver due to missing permission. Please enable Location for udpRC4UGV in settings.");
+			alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+							finish();
+						}
+					});
+			alertDialog.show();
+		}
+		return;
 	}
 
 	@Override
